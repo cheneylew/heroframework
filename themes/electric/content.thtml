@@ -1,0 +1,59 @@
+{extends file="layout.thtml"}
+{block name="title"}
+{$title} - {$smarty.block.parent}
+{/block}
+{block name="content"}
+	<h1>{$title}</h1>
+	<div class="article">
+		{$body}
+		<ul class="form">
+			
+			{foreach $custom_fields as $field}
+				{if $field.name == 'embed_content'}
+					{custom_field field=$field value={$field.values} default=$field.default}
+					<ul>
+					{foreach from=$embed_content item=item}
+						<li>{$item.title}</li>
+					{/foreach}
+					</ul>
+				{else if $field.name == 'file_list'}
+					
+					{custom_field field=$field value={$field.values} default=$field.default}
+					file_list:<br/>
+					<ul>
+					{foreach from=$file_list item=item}
+						<li><a href="{$item.path}">{$item.title}</a></li>
+					{/foreach}
+					</ul>
+				{/if}
+			{/foreach}
+			
+			gallery:<br/>
+			{foreach $gallery|@unserialize as $item}
+				{$item}
+			{/foreach}
+			
+			<!--
+			{foreach $custom_fields as $field}
+			{if $field.type != 'checkbox'}
+				<li>
+					<label class="full" for="{$field.name}">{$field.friendly_name}</label>
+				</li>
+				<li>
+					{custom_field field=$field value={$field.values} default=$field.default}
+				</li>
+			{else}
+				<li>
+					{custom_field field=$field value=$values[$field.name]} <label style="display: inline; float: none" for="field_{$field.name}">{$field.friendly_name}</label>
+				</li>
+			{/if}
+			{if $field.help}
+				<li>
+					<div class="help flush">{$field.help}</div>
+				</li>
+			{/if}
+			{/foreach}
+			-->
+		</ul>
+	</div>
+{/block}

@@ -1,0 +1,26 @@
+<?php if (!defined('BASEPATH')) exit('No direct script access allowed');
+
+$route['((en|tc|sc))/index'] = 'frontpage';
+$route['((en|tc|sc))'] = 'frontpage';
+$route['((sc|en|tc))/20180102125523/955030'] = 'publish/content/view/20180102125523/955030';
+$route['20180102125523/955030'] = 'publish/content/view/20180102125523/955030';
+$route['((sc|en|tc))/rdLXv9Q4YwnY029A5VZ2s6mDcpKM'] = 'paywall/protected_link/redirect/rdLXv9Q4YwnY029A5VZ2s6mDcpKM';
+$route['rdLXv9Q4YwnY029A5VZ2s6mDcpKM'] = 'paywall/protected_link/redirect/rdLXv9Q4YwnY029A5VZ2s6mDcpKM';
+$route['((sc|en|tc))/product/bbb'] = 'publish/content/view/product/bbb';
+$route['product/bbb'] = 'publish/content/view/product/bbb';
+$route['((sc|en|tc))/Blog'] = 'blogs/blog/view/Blog';
+$route['Blog'] = 'blogs/blog/view/Blog';
+$route['((sc|en|tc))/blog_rss'] = 'rss/feed/view/blog_rss';
+$route['blog_rss'] = 'rss/feed/view/blog_rss';
+$route['((sc|en|tc))/contact_us'] = 'forms/form/view/contact_us';
+$route['contact_us'] = 'forms/form/view/contact_us';
+$route['((sc|en|tc))/events'] = 'theme/template/view/events';
+$route['events'] = 'theme/template/view/events';
+$route['((sc|en|tc))/product/fff'] = 'publish/content/view/product/fff';
+$route['product/fff'] = 'publish/content/view/product/fff';
+$route['((sc|en|tc))/product/hjkkyuik'] = 'publish/content/view/product/hjkkyuik';
+$route['product/hjkkyuik'] = 'publish/content/view/product/hjkkyuik';
+$route['((sc|en|tc))/product/hjkkyuik_1'] = 'publish/content/view/product/hjkkyuik_1';
+$route['product/hjkkyuik_1'] = 'publish/content/view/product/hjkkyuik_1';
+$route['((sc|en|tc))/20170313135223/169395'] = 'publish/content/view/20170313135223/169395';
+$route['20170313135223/169395'] = 'publish/content/view/20170313135223/169395';

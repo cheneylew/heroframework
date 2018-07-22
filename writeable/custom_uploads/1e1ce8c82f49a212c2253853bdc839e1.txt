@@ -1,0 +1,12 @@
+Linux:
+
+//Get Whole Website
+wget -r http://www.example.com
+
+system-config-network
+
+ifconfig
+
+ifup eth0
+
+service network restart

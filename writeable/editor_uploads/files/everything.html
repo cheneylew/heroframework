@@ -1,0 +1,903 @@
+if (typeof YUI != "undefined") {
+    YUI._YUI = YUI
+}
+var YUI = function () {
+    var c = 0,
+        f = this,
+        b = arguments,
+        a = b.length,
+        e = function (h, g) {
+            return (h && h.hasOwnProperty && (h instanceof g))
+        }, d = (typeof YUI_config !== "undefined") && YUI_config;
+    if (!(e(f, YUI))) {
+        f = new YUI()
+    } else {
+        f._init();
+        if (YUI.GlobalConfig) {
+            f.applyConfig(YUI.GlobalConfig)
+        }
+        if (d) {
+            f.applyConfig(d)
+        }
+        if (!a) {
+            f._setup()
+        }
+    }
+    if (a) {
+        for (; c < a; c++) {
+            f.applyConfig(b[c])
+        }
+        f._setup()
+    }
+    f.instanceOf = e;
+    return f
+};
+(function () {
+    var p, b, q = "3.4.0",
+        h = ".",
+        n = "http://yui.yahooapis.com/",
+        t = "yui3-js-enabled",
+        l = function () {}, g = Array.prototype.slice,
+        r = {
+            "io.xdrReady": 1,
+            "io.xdrResponse": 1,
+            "SWF.eventHandler": 1
+        }, f = (typeof window != "undefined"),
+        e = (f) ? window : null,
+        v = (f) ? e.document : null,
+        d = v && v.documentElement,
+        a = d && d.className,
+        c = {}, i = new Date().getTime(),
+        m = function (z, y, x, w) {
+            if (z && z.addEventListener) {
+                z.addEventListener(y, x, w)
+            } else {
+                if (z && z.attachEvent) {
+                    z.attachEvent("on" + y, x)
+                }
+            }
+        }, u = function (B, z, y, w) {
+            if (B && B.removeEventListener) {
+                try {
+                    B.removeEventListener(z, y, w)
+                } catch (x) {}
+            } else {
+                if (B && B.detachEvent) {
+                    B.detachEvent("on" + z, y)
+                }
+            }
+        }, s = function () {
+            YUI.Env.windowLoaded = true;
+            YUI.Env.DOMReady = true;
+            if (f) {
+                u(window, "load", s)
+            }
+        }, j = function (y, x) {
+            var w = y.Env._loader;
+            if (w) {
+                w.ignoreRegistered = false;
+                w.onEnd = null;
+                w.data = null;
+                w.required = [];
+                w.loadType = null
+            } else {
+                w = new y.Loader(y.config);
+                y.Env._loader = w
+            }
+            YUI.Env.core = y.Array.dedupe([].concat(YUI.Env.core, ["loader-base", "loader-rollup", "loader-yui3"]));
+            return w
+        }, o = function (y, x) {
+            for (var w in x) {
+                if (x.hasOwnProperty(w)) {
+                    y[w] = x[w]
+                }
+            }
+        }, k = {
+            success: true
+        };
+    if (d && a.indexOf(t) == -1) {
+        if (a) {
+            a += " "
+        }
+        a += t;
+        d.className = a
+    }
+    if (q.indexOf("@") > -1) {
+        q = "3.3.0"
+    }
+    p = {
+        applyConfig: function (E) {
+            E = E || l;
+            var y, B, z = this.config,
+                C = z.modules,
+                x = z.groups,
+                D = z.rls,
+                w = this.Env._loader;
+            for (B in E) {
+                if (E.hasOwnProperty(B)) {
+                    y = E[B];
+                    if (C && B == "modules") {
+                        o(C, y)
+                    } else {
+                        if (x && B == "groups") {
+                            o(x, y)
+                        } else {
+                            if (D && B == "rls") {
+                                o(D, y)
+                            } else {
+                                if (B == "win") {
+                                    z[B] = y.contentWindow || y;
+                                    z.doc = z[B].document
+                                } else {
+                                    if (B == "_yuid") {} else {
+                                        z[B] = y
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (w) {
+                w._config(E)
+            }
+        },
+        _config: function (w) {
+            this.applyConfig(w)
+        },
+        _init: function () {
+            var y, z = this,
+                w = YUI.Env,
+                x = z.Env,
+                B;
+            z.version = q;
+            if (!x) {
+                z.Env = {
+                    core: ["get", "features", "intl-base", "yui-log", "yui-later", "loader-base", "loader-rollup", "loader-yui3"],
+                    mods: {},
+                    versions: {},
+                    base: n,
+                    cdn: n + q + "/build/",
+                    _idx: 0,
+                    _used: {},
+                    _attached: {},
+                    _missed: [],
+                    _yidx: 0,
+                    _uidx: 0,
+                    _guidp: "y",
+                    _loaded: {},
+                    _BASE_RE: /(?:\?(?:[^&]*&)*([^&]*))?\b(simpleyui|yui(?:-\w+)?)\/\2(?:-(min|debug))?\.js/,
+                    parseBasePath: function (G, E) {
+                        var C = G.match(E),
+                            F, D;
+                        if (C) {
+                            F = RegExp.leftContext || G.slice(0, G.indexOf(C[0]));
+                            D = C[3];
+                            if (C[1]) {
+                                F += "?" + C[1]
+                            }
+                            F = {
+                                filter: D,
+                                path: F
+                            }
+                        }
+                        return F
+                    },
+                    getBase: w && w.getBase || function (G) {
+                        var E = (v && v.getElementsByTagName("script")) || [],
+                            H = x.cdn,
+                            D, F, C, I;
+                        for (F = 0, C = E.length; F < C; ++F) {
+                            I = E[F].src;
+                            if (I) {
+                                D = z.Env.parseBasePath(I, G);
+                                if (D) {
+                                    y = D.filter;
+                                    H = D.path;
+                                    break
+                                }
+                            }
+                        }
+                        return H
+                    }
+                };
+                x = z.Env;
+                x._loaded[q] = {};
+                if (w && z !== YUI) {
+                    x._yidx = ++w._yidx;
+                    x._guidp = ("yui_" + q + "_" + x._yidx + "_" + i).replace(/\./g, "_")
+                } else {
+                    if (YUI._YUI) {
+                        w = YUI._YUI.Env;
+                        x._yidx += w._yidx;
+                        x._uidx += w._uidx;
+                        for (B in w) {
+                            if (!(B in x)) {
+                                x[B] = w[B]
+                            }
+                        }
+                        delete YUI._YUI
+                    }
+                }
+                z.id = z.stamp(z);
+                c[z.id] = z
+            }
+            z.constructor = YUI;
+            z.config = z.config || {
+                win: e,
+                doc: v,
+                debug: true,
+                useBrowserConsole: true,
+                throwFail: true,
+                bootstrap: true,
+                cacheUse: true,
+                fetchCSS: true,
+                use_rls: false,
+                rls_timeout: 2000
+            };
+            if (YUI.Env.rls_disabled) {
+                z.config.use_rls = false
+            }
+            z.config.lang = z.config.lang || "en-US";
+            z.config.base = YUI.config.base || z.Env.getBase(z.Env._BASE_RE);
+            if (!y || (!("mindebug").indexOf(y))) {
+                y = "min"
+            }
+            y = (y) ? "-" + y : y;
+            z.config.loaderPath = YUI.config.loaderPath || "loader/loader" + y + ".js"
+        },
+        _setup: function (C) {
+            var x, B = this,
+                w = [],
+                z = YUI.Env.mods,
+                y = B.config.core || [].concat(YUI.Env.core);
+            for (x = 0; x < y.length; x++) {
+                if (z[y[x]]) {
+                    w.push(y[x])
+                }
+            }
+            B._attach(["yui-base"]);
+            B._attach(w);
+            if (B.Loader) {
+                j(B)
+            }
+        },
+        applyTo: function (D, C, y) {
+            if (!(C in r)) {
+                this.log(C + ": applyTo not allowed", "warn", "yui");
+                return null
+            }
+            var x = c[D],
+                B, w, z;
+            if (x) {
+                B = C.split(".");
+                w = x;
+                for (z = 0; z < B.length; z = z + 1) {
+                    w = w[B[z]];
+                    if (!w) {
+                        this.log("applyTo not found: " + C, "warn", "yui")
+                    }
+                }
+                return w.apply(x, y)
+            }
+            return null
+        },
+        add: function (x, D, C, w) {
+            w = w || {};
+            var B = YUI.Env,
+                E = {
+                    name: x,
+                    fn: D,
+                    version: C,
+                    details: w
+                }, F, z, y = B.versions;
+            B.mods[x] = E;
+            y[C] = y[C] || {};
+            y[C][x] = E;
+            for (z in c) {
+                if (c.hasOwnProperty(z)) {
+                    F = c[z].Env._loader;
+                    if (F) {
+                        if (!F.moduleInfo[x]) {
+                            F.addModule(w, x)
+                        }
+                    }
+                }
+            }
+            return this
+        },
+        _attach: function (C, N) {
+            var G, O, M, J, w, E, y, z = YUI.Env.mods,
+                H = YUI.Env.aliases,
+                x = this,
+                F, B = x.Env._loader,
+                D = x.Env._attached,
+                I = C.length,
+                B, L = [];
+            for (G = 0; G < I; G++) {
+                O = C[G];
+                M = z[O];
+                L.push(O);
+                if (B && B.conditions[O]) {
+                    x.Object.each(B.conditions[O], function (Q) {
+                        var P = Q && ((Q.ua && x.UA[Q.ua]) || (Q.test && Q.test(x)));
+                        if (P) {
+                            L.push(Q.name)
+                        }
+                    })
+                }
+            }
+            C = L;
+            I = C.length;
+            for (G = 0; G < I; G++) {
+                if (!D[C[G]]) {
+                    O = C[G];
+                    M = z[O];
+                    if (H && H[O]) {
+                        x._attach(H[O]);
+                        continue
+                    }
+                    if (!M) {
+                        if (B && B.moduleInfo[O]) {
+                            M = B.moduleInfo[O];
+                            N = true
+                        }
+                        if (!N) {
+                            if ((O.indexOf("skin-") === -1) && (O.indexOf("css") === -1)) {
+                                x.Env._missed.push(O);
+                                x.Env._missed = x.Array.dedupe(x.Env._missed);
+                                x.message("NOT loaded: " + O, "warn", "yui")
+                            }
+                        }
+                    } else {
+                        D[O] = true;
+                        for (F = 0; F < x.Env._missed.length; F++) {
+                            if (x.Env._missed[F] === O) {
+                                x.message("Found: " + O + " (was reported as missing earlier)", "warn", "yui");
+                                x.Env._missed.splice(F, 1)
+                            }
+                        }
+                        J = M.details;
+                        w = J.requires;
+                        E = J.use;
+                        y = J.after;
+                        i...this._stdModNode.addClass(e.getClassName(m));
+                        this._renderStdModSections();
+                        this.after(l, this._afterHeaderChange);
+                        this.after(C, this._afterBodyChange);
+                        this.after(o, this._afterFooterChange)
+                    }, _renderStdModSections: function () {
+                        if (f.isValue(this.get(a))) {
+                            this._renderStdMod(k)
+                        }
+                        if (f.isValue(this.get(i))) {
+                            this._renderStdMod(B)
+                        }
+                        if (f.isValue(this.get(c))) {
+                            this._renderStdMod(p)
+                        }
+                    },
+                    _bindUIStdMod: function () {
+                        this.after(r, this._afterFillHeightChange);
+                        this.after(t, this._fillHeight);
+                        this.after(P, this._fillHeight)
+                    },
+                    _afterHeaderChange: function (L) {
+                        if (L.src !== s) {
+                            this._uiSetStdMod(k, L.newVal, L.stdModPosition)
+                        }
+                    },
+                    _afterBodyChange: function (L) {
+                        if (L.src !== s) {
+                            this._uiSetStdMod(B, L.newVal, L.stdModPosition)
+                        }
+                    },
+                    _afterFooterChange: function (L) {
+                        if (L.src !== s) {
+                            this._uiSetStdMod(p, L.newVal, L.stdModPosition)
+                        }
+                    },
+                    _afterFillHeightChange: function (L) {
+                        this._uiSetFillHeight(L.newVal)
+                    },
+                    _validateFillHeight: function (L) {
+                        return !L || L == Q.BODY || L == Q.HEADER || L == Q.FOOTER
+                    },
+                    _uiSetFillHeight: function (S) {
+                        var R = this.getStdModNode(S);
+                        var L = this._currFillNode;
+                        if (L && R !== L) {
+                            L.setStyle(z, d)
+                        }
+                        if (R) {
+                            this._currFillNode = R
+                        }
+                        this._fillHeight()
+                    },
+                    _fillHeight: function () {
+                        if (this.get(O)) {
+                            var L = this.get(z);
+                            if (L != d && L != y) {
+                                this.fillHeight(this._currFillNode)
+                            }
+                        }
+                    },
+                    _uiSetStdMod: function (T, S, L) {
+                        if (f.isValue(S)) {
+                            var R = this.getStdModNode(T) || this._renderStdMod(T);
+                            this._addStdModContent(R, S, L);
+                            this.set(T + J, this._getStdModContent(T), {
+                                src: s
+                            })
+                        } else {
+                            this._eraseStdMod(T)
+                        }
+                        this.fire(P)
+                    },
+                    _renderStdMod: function (S) {
+                        var L = this.get(v),
+                            R = this._findStdModSection(S);
+                        if (!R) {
+                            R = this._getStdModTemplate(S)
+                        }
+                        this._insertStdModSection(L, S, R);
+                        this[S + u] = R;
+                        return this[S + u]
+                    },
+                    _eraseStdMod: function (R) {
+                        var L = this.getStdModNode(R);
+                        if (L) {
+                            L.remove(true);
+                            delete this[R + u]
+                        }
+                    },
+                    _insertStdModSection: function (L, T, S) {
+                        var R = L.get(D);
+                        if (T === p || !R) {
+                            L.appendChild(S)
+                        } else {
+                            if (T === k) {
+                                L.insertBefore(S, R)
+                            } else {
+                                var U = this[p + u];
+                                if (U) {
+                                    L.insertBefore(S, U)
+                                } else {
+                                    L.appendChild(S)
+                                }
+                            }
+                        }
+                    },
+                    _getStdModTemplate: function (L) {
+                        return q.create(Q.TEMPLATES[L], this._stdModNode.get(n))
+                    },
+                    _addStdModContent: function (S, R, L) {
+                        switch (L) {
+                        case Q.BEFORE:
+                            L = 0;
+                            break;
+                        case Q.AFTER:
+                            L = undefined;
+                            break;
+                        default:
+                            L = Q.REPLACE
+                        }
+                        S.insert(R, L)
+                    },
+                    _getPreciseHeight: function (S) {
+                        var L = (S) ? S.get(G) : 0,
+                            T = "getBoundingClientRect";
+                        if (S && S.hasMethod(T)) {
+                            var R = S.invoke(T);
+                            if (R) {
+                                L = R.bottom - R.top
+                            }
+                        }
+                        return L
+                    },
+                    _findStdModSection: function (L) {
+                        return this.get(v).one("> ." + Q.SECTION_CLASS_NAMES[L])
+                    },
+                    _parseStdModHTML: function (R) {
+                        var L = this._findStdModSection(R);
+                        if (L) {
+                            if (!this._stdModParsed) {
+                                this._stdModParsed = {};
+                                b.before(this._applyStdModParsedConfig, this, I)
+                            }
+                            this._stdModParsed[R + J] = 1;
+                            return L.get("innerHTML")
+                        }
+                        return null
+                    },
+                    _applyStdModParsedConfig: function (T, L, S) {
+                        var R = this._stdModParsed;
+                        if (R) {
+                            R[a] = !(a in L) && (a in R);
+                            R[i] = !(i in L) && (i in R);
+                            R[c] = !(c in L) && (c in R)
+                        }
+                    },
+                    _getStdModContent: function (L) {
+                        return (this[L + u]) ? this[L + u].get(h) : null
+                    },
+                    setStdModContent: function (S, R, L) {
+                        this.set(S + J, R, {
+                            stdModPosition: L
+                        })
+                    },
+                    getStdModNode: function (L) {
+                        return this[L + u] || null
+                    },
+                    fillHeight: function (R) {
+                        if (R) {
+                            var W = this.get(v),
+                                X = [this.headerNode, this.bodyNode, this.footerNode],
+                                L, Y, Z = 0,
+                                U = 0,
+                                T = false;
+                            for (var V = 0, S = X.length; V < S; V++) {
+                                L = X[V];
+                                if (L) {
+                                    if (L !== R) {
+                                        Z += this._getPreciseHeight(L)
+                                    } else {
+                                        T = true
+                                    }
+                                }
+                            }
+                            if (T) {
+                                if (x.ie || x.opera) {
+                                    R.set(G, 0)
+                                }
+                                Y = W.get(G) - parseInt(W.getComputedStyle("paddingTop"), 10) - parseInt(W.getComputedStyle("paddingBottom"), 10) - parseInt(W.getComputedStyle("borderBottomWidth"), 10) - parseInt(W.getComputedStyle("borderTopWidth"), 10);
+                                if (f.isNumber(Y)) {
+                                    U = Y - Z;
+                                    if (U >= 0) {
+                                        R.set(G, U)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+                b.WidgetStdMod = Q
+            }, "3.4.0", {
+                requires: ["base-build", "widget"]
+            });
+        YUI.add("widget-uievents", function (g) {
+            var f = "boundingBox",
+                e = g.Widget,
+                d = "render",
+                a = g.Lang,
+                c = ":",
+                b = g.Widget._uievts = g.Widget._uievts || {};
+            g.mix(e.prototype, {
+                _destroyUIEvents: function () {
+                    var h = g.stamp(this, true);
+                    g.each(b, function (j, i) {
+                        if (j.instances[h]) {
+                            delete j.instances[h];
+                            if (g.Object.isEmpty(j.instances)) {
+                                j.handle.detach();
+                                if (b[i]) {
+                                    delete b[i]
+                                }
+                            }
+                        }
+                    })
+                },
+                UI_EVENTS: g.Node.DOM_EVENTS,
+                _getUIEventNode: function () {
+                    return this.get(f)
+                },
+                _createUIEvent: function (i) {
+                    var l = this._getUIEventNode(),
+                        h = (g.stamp(l) + i),
+                        k = b[h],
+                        j;
+                    if (!k) {
+                        j = l.delegate(i, function (m) {
+                            var n = e.getByNode(this);
+                            if (n) {
+                                if (n._filterUIEvent(m)) {
+                                    n.fire(m.type, {
+                                        domEvent: m
+                                    })
+                                }
+                            }
+                        }, "." + g.Widget.getClassName());
+                        b[h] = k = {
+                            instances: {},
+                            handle: j
+                        }
+                    }
+                    k.instances[g.stamp(this)] = 1
+                },
+                _filterUIEvent: function (h) {
+                    return (h.currentTarget.compareTo(h.container) || h.container.compareTo(this._getUIEventNode()))
+                },
+                _getUIEvent: function (j) {
+                    if (a.isString(j)) {
+                        var k = this.parseType(j)[1],
+                            h, i;
+                        if (k) {
+                            h = k.indexOf(c);
+                            if (h > -1) {
+                                k = k.substring(h + c.length)
+                            }
+                            if (this.UI_EVENTS[k]) {
+                                i = k
+                            }
+                        }
+                        return i
+                    }
+                },
+                _initUIEvent: function (i) {
+                    var j = this._getUIEvent(i),
+                        h = this._uiEvtsInitQueue || {};
+                    if (j && !h[j]) {
+                        this._uiEvtsInitQueue = h[j] = 1;
+                        this.after(d, function () {
+                            this._createUIEvent(j);
+                            delete this._uiEvtsInitQueue[j]
+                        })
+                    }
+                },
+                on: function (h) {
+                    this._initUIEvent(h);
+                    return e.superclass.on.apply(this, arguments)
+                },
+                publish: function (i, h) {
+                    var j = this._getUIEvent(i);
+                    if (j && h && h.defaultFn) {
+                        this._initUIEvent(j)
+                    }
+                    return e.superclass.publish.apply(this, arguments)
+                }
+            }, true)
+        }, "3.4.0", {
+            requires: ["widget-base", "node-event-delegate"]
+        });
+        YUI.add("yui-throttle", function (a) {
+            /* Based on work by Simon Willison: http://gist.github.com/292562 */
+            a.throttle = function (c, b) {
+                b = (b) ? b : (a.config.throttleTime || 150);
+                if (b === -1) {
+                    return (function () {
+                        c.apply(null, arguments)
+                    })
+                }
+                var d = a.Lang.now();
+                return (function () {
+                    var e = a.Lang.now();
+                    if (e - d > b) {
+                        d = e;
+                        c.apply(null, arguments)
+                    }
+                })
+            }
+        }, "3.4.0", {
+            requires: ["yui-base"]
+        });
+        (function () {
+            YUI.AUI_config = {
+                io: {
+                    method: "GET"
+                },
+                combine: Liferay.AUI.getCombine(),
+                groups: {
+                    alloy: {
+                        combine: Liferay.AUI.getCombine(),
+                        modules: {
+                            "aui-ace-editor": {
+                                submodules: {
+                                    "aui-ace-editor-theme-textmate": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-groovy": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-theme-twilight": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-keybinding-vim": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-clojure": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-theme-merbivore_soft": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-scala": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-csharp": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-css": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-theme-pastel_on_dark": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-worker-javascript": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-theme-crimson_editor": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-theme-cobalt": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-theme-eclipse": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-theme-clouds_midnight": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-worker-coffee": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-scss": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-theme-clouds": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-c_cpp": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-theme-kr_theme": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-scad": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-perl": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-textile": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-json": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-theme-solarized_light": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-theme-mono_industrial": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-theme-merbivore": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-svg": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-java": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-theme-vibrant_ink": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-theme-dawn": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-python": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-keybinding-emacs": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-javascript": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-theme-monokai": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-ruby": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-worker-css": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-coffee": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-html": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-theme-idle_fingers": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-ocaml": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-theme-solarized_dark": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-php": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-mode-xml": {
+                                        skinnable: false,
+                                        requires: ["aui-ace-editor-base"]
+                                    },
+                                    "aui-ace-editor-base": {
+                                        skinnable: false,
+                                        requires: ["aui-component", "aui-node"]
+                                    }
+                                },
+                                use: ["aui-ace-editor-base", "aui-ace-editor-mode-xml", "aui-ace-editor-mode-php", "aui-ace-editor-theme-solarized_dark", "aui-ace-editor-mode-ocaml", "aui-ace-editor-theme-idle_fingers", "aui-ace-editor-mode-html", "aui-ace-editor-mode-coffee", "aui-ace-editor-worker-css", "aui-ace-editor-mode-ruby", "aui-ace-editor-theme-monokai", "aui-ace-editor-mode-javascript", "aui-ace-editor-keybinding-emacs", "aui-ace-editor-mode-python", "aui-ace-editor-theme-dawn", "aui-ace-editor-theme-vibrant_ink", "aui-ace-editor-mode-java", "aui-ace-editor-mode-svg", "aui-ace-editor-theme-merbivore", "aui-ace-editor-theme-mono_industrial", "aui-ace-editor-theme-solarized_light", "aui-ace-editor-mode-json", "aui-ace-editor-mode-textile", "aui-ace-editor-mode-perl", "aui-ace-editor-mode-scad", "aui-ace-editor-theme-kr_theme", "aui-ace-editor-mode-c_cpp", "aui-ace-editor-theme-clouds", "aui-ace-editor-mode-scss", "aui-ace-editor-worke...u=false;var z=(x==o);var w=(x==m);var s=(x>=o);var v=(x>=m);var q=true;if(v){if(w||z){var t=l.get("
+                                timestamp ");if(t=="
+                                expired "){z=true;s=true}else{if(l.get("
+                                autoExtend ")){s=false;v=false;z=false;w=false;u=true}else{var y=Math.floor((e.now()-t)/1000)*1000;if(y<m){l._elapsed=y;q=false;v=false}}}}if(q){if(z){l.expire()}else{if(w){l.warn()}else{if(u){l.extend()}}}}}for(var r in p){p[r](x,n,v,s,w,z)}},n)},_stopTimer:function(){var l=this;c.clearInterval(l._intervalId)},_cookieKey:"
+                                LFR_SESSION_STATE_ "+themeDisplay.getUserId()}});i.SRC=g;var a=c.Component.create({ATTRS:{pageTitle:{value:d.title}},EXTENDS:c.Plugin.Base,NAME:"
+                                liferaysessiondisplay ",NS:"
+                                display ",prototype:{initializer:function(m){var l=this;var n=l.get("
+                                host ");if(Liferay.Util.getTop()==k.win){l._host=n;l._toggleText={hide:'\u0048\u0069\u0064\u0065',show:'\u0053\u0068\u006f\u0077'};l._expiredText='\u0057\u0061\u0072\u006e\u0069\u006e\u0067\u0021\u0020\u0044\u0075\u0065\u0020\u0074\u006f\u0020\u0069\u006e\u0061\u0063\u0074\u0069\u0076\u0069\u0074\u0079\u002c\u0020\u0079\u006f\u0075\u0072\u0020\u0073\u0065\u0073\u0073\u0069\u006f\u006e\u0020\u0068\u0061\u0073\u0020\u0065\u0078\u0070\u0069\u0072\u0065\u0064\u002e\u0020\u0050\u006c\u0065\u0061\u0073\u0065\u0020\u0073\u0061\u0076\u0065\u0020\u0061\u006e\u0079\u0020\u0064\u0061\u0074\u0061\u0020\u0079\u006f\u0075\u0020\u006d\u0061\u0079\u0020\u0068\u0061\u0076\u0065\u0020\u0065\u006e\u0074\u0065\u0072\u0065\u0064\u0020\u0062\u0065\u0066\u006f\u0072\u0065\u0020\u0072\u0065\u0066\u0072\u0065\u0073\u0068\u0069\u006e\u0067\u0020\u0074\u0068\u0065\u0020\u0070\u0061\u0067\u0065\u002e';l._extendText='\u0045\u0078\u0074\u0065\u006e\u0064';l._warningText='\u0057\u0061\u0072\u006e\u0069\u006e\u0067\u0021\u0020\u0044\u0075\u0065\u0020\u0074\u006f\u0020\u0069\u006e\u0061\u0063\u0074\u0069\u0076\u0069\u0074\u0079\u002c\u0020\u0079\u006f\u0075\u0072\u0020\u0073\u0065\u0073\u0073\u0069\u006f\u006e\u0020\u0077\u0069\u006c\u006c\u0020\u0065\u0078\u0070\u0069\u0072\u0065\u0020\u0069\u006e\u0020\u007b\u0030\u007d\u002e\u0020\u0054\u006f\u0020\u0065\u0078\u0074\u0065\u006e\u0064\u0020\u0079\u006f\u0075\u0072\u0020\u0073\u0065\u0073\u0073\u0069\u006f\u006e\u0020\u0061\u006e\u006f\u0074\u0068\u0065\u0072\u0020\u007b\u0031\u007d\u0020\u006d\u0069\u006e\u0075\u0074\u0065\u0028\u0073\u0029\u002c\u0020\u0070\u006c\u0065\u0061\u0073\u0065\u0020\u0070\u0072\u0065\u0073\u0073\u0020\u0074\u0068\u0065\u0020\u003c\u0065\u006d\u003e\u0045\u0078\u0074\u0065\u006e\u0064\u003c\u002f\u0065\u006d\u003e\u0020\u0062\u0075\u0074\u0074\u006f\u006e\u002e';l._warningText=e.sub(l._warningText,['<span class="
+                                countdown - timer ">{0}</span>',n.get("
+                                warningLength ")/60000]);n.on("
+                                sessionStateChange ",l._onHostSessionStateChange,l);l.afterHostMethod("
+                                _defActivatedFn ",l._afterDefActivatedFn);l.afterHostMethod("
+                                _defExpiredFn ",l._afterDefExpiredFn)}else{n.unplug(l)}},_afterDefActivatedFn:function(m){var l=this;l._uiSetActivated()},_afterDefExpiredFn:function(m){var l=this;l._host.unregisterInterval(l._intervalId);l._uiSetExpired()},_beforeHostWarned:function(r){var l=this;var q=l._host;var p=q.get("
+                                warningLength ");var o=p;var n=l._getBanner();var m=n.one(".countdown - timer ");l._uiSetRemainingTime(o,m);n.show();l._intervalId=q.registerInterval(function(t,v,x,s,w,u){if(!x){l._uiSetActivated()}else{if(!s){if(w){if(o<=0){o=p}n.show()}l._uiSetRemainingTime(o,m)}}o-=v})},_getBanner:function(){var l=this;var m=l._banner;if(!m){m=new Liferay.Notice({closeText:l._extendText,content:l._warningText,noticeClass:"
+                                aui - helper - hidden ",onClose:function(){l._host.extend()},toggleText:false});l._banner=m}return m},_onHostSessionStateChange:function(m){var l=this;if(m.newVal=="
+                                warned "){l._beforeHostWarned(m)}},_uiSetActivated:function(){var l=this;d.title=l.reset("
+                                pageTitle ").get("
+                                pageTitle ");l._host.unregisterInterval(l._intervalId);var m=l._getBanner();if(m){m.hide()}},_uiSetExpired:function(){var l=this;var m=l._getBanner();m.html(l._expiredText);m.replaceClass("
+                                popup - alert - notice ","
+                                popup - alert - warning ");m.show();d.title=l.get("
+                                pageTitle ")},_uiSetRemainingTime:function(o,n){var l=this;var m=l._getBanner();n=n||m.one(".countdown - timer ");n.text(l._formatTime(o));d.title=m.text()},_formatNumber:function(n){var l=this;var m=Math.floor;var o=e.String.padNumber;return e.String.padNumber(Math.floor(n),2)},_formatTime:function(m){var l=this;m=Number(m);if(e.isNumber(m)&&m>0){m/=1000;j[0]=l._formatNumber(m/3600);m%=3600;j[1]=l._formatNumber(m/60);m%=60;j[2]=l._formatNumber(m);m=j.join(": ")}else{m=0}return m}}});Liferay.SessionBase=i;Liferay.SessionDisplay=a},"
+                                ",{requires:["
+                                aui - io ","
+                                aui - task - manager ","
+                                cookie ","
+                                liferay - notice "]});Liferay.namespace("
+                                Util ");Liferay.Util.checkMaxLength=function(b,a){if((b.value.length)>=a){b.value=b.value.substring(0,a-1)}};Liferay.namespace("
+                                Events ");Liferay.bind=Liferay.on;Liferay.trigger=Liferay.fire;Liferay.unbind=Liferay.detach;Liferay.Events.on=Liferay.on;Liferay.Events.trigger=Liferay.fire;Liferay.Events.unbind=Liferay.detach;Liferay.Popup=function(){};
